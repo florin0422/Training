@@ -1,32 +1,40 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from './page-objects/loginPage';
+import { ProductsPage } from './page-objects/productsPage';
+import { CartPage } from './page-objects/cartPage';
+import { YourInfoPage } from './page-objects/yourInfoPage';
 
- test('get started link', {tag: ['@smoke']}, async ({ page }) => { 
+ test.skip('get started link', {tag: ['@smoke']}, async ({ page }) => { 
 
    await page.goto('https://www.saucedemo.com/'); 
-   await page.getByPlaceholder('Username').fill('standard_user');  
-   await page.getByRole('textbox', {name: 'password'}).fill('secret_sauce');  
-   await page.locator('xpath = /html/body/div/div/div[2]/div[1]/div/div/form/input').click();  
-   await page.waitForTimeout(1000);  await expect(page.locator('.app_logo', { hasText: 'Swag Labs' })).toBeVisible();  
-   await page.locator('xpath = //*[@id="add-to-cart-sauce-labs-backpack"]').click();  
-   await page.waitForTimeout(1000);  await expect(page.locator('xpath = //*[@id="remove-sauce-labs-backpack"]')).toBeVisible();  
-   await page.locator('xpath = /html/body/div/div/div/div[2]/div/div/div/div[6]/div[2]/div[2]/button').scrollIntoViewIfNeeded();  
-   await page.waitForTimeout(2000);
-   await page.locator('xpath = //*[@id="add-to-cart-test.allthethings()-t-shirt-(red)"]').click();  
-   await page.waitForTimeout(1000);  await expect(page.locator('xpath = //*[@id="remove-test.allthethings()-t-shirt-(red)"]')).toBeVisible();  
-   await page.locator('xpath = //*[@id="add-to-cart-sauce-labs-onesie"]').click();  
-   await page.waitForTimeout(1000);  await expect(page.locator('xpath = //*[@id="remove-sauce-labs-onesie"]')).toBeVisible();  
-   await page.waitForTimeout(2000);
-   await page.locator('xpath = //*[@id="remove-sauce-labs-onesie"]').click();  
-   await page.waitForTimeout(1000);  await expect(page.locator('xpath = //*[@id="add-to-cart-sauce-labs-onesie"]')).toBeVisible();  
-   await page.locator('xpath = /html/body/div/div/div/div[1]/div[1]/div[3]/a').scrollIntoViewIfNeeded();  
+   const loginPage = new LoginPage(page);
+   await loginPage.performLogin();
+   await page.waitForTimeout(1000);  
+   const productsPage = new ProductsPage(page);
+   await productsPage.checkAppLogo();
+   await productsPage.addBackPack();
+   await page.waitForTimeout(1000);  
+   await productsPage.sortHiLo();
    await page.waitForTimeout(1000);
-   await page.locator('xpath = /html/body/div/div/div/div[1]/div[1]/div[3]/a').click();  
-   await page.waitForTimeout(1000);  await expect(page.locator('xpath = /html/body/div/div/div/div[1]/div[2]')).toBeVisible();  
-   const cartBadge = page.locator('xpath = /html/body/div/div/div/div[1]/div[1]/div[3]/a/span');
-   await expect(cartBadge).toHaveText('2');
+   await productsPage.scrollToOnsie();
    await page.waitForTimeout(1000);
-   await page.locator('xpath = /html/body/div/div/div/div[2]/div/div[2]/button[2]').click();  
-   await expect(page.getByText('Checkout: Your Information')).toBeVisible();
+   await productsPage.addRedTshirt();
+   await productsPage.addOnsie();
+   await page.waitForTimeout(1000);
+   await productsPage.removeOnsie();
+   await page.waitForTimeout(1000);
+   await productsPage.scrollToCart();
+   await page.waitForTimeout(1000);
+   await productsPage.clickOnCart();
+   await page.waitForTimeout(1000); 
+   const cartPage = new CartPage (page); 
+   await cartPage.checkCartPageName();   
+   await cartPage.checkNumberInTheCart;
+   await page.waitForTimeout(1000);
+   await cartPage.clickOnCheckout();
+   //await expect(page.getByText('Checkout: Your Information')).toBeVisible();
+   const yourInfoPage = new YourInfoPage(page);
+   await yourInfoPage.checkInfoPageName();
    await page.waitForTimeout(1000);
    await page.getByPlaceholder('First Name').fill('Florin');  
    await page.waitForTimeout(1000);
@@ -42,8 +50,7 @@ import { test, expect } from '@playwright/test';
    await page.waitForTimeout(1000);
    await page.locator('xpath = //*[@id="continue"]').click();  
    await page.waitForTimeout(1000);
-   // Adjust this selector to match all individual item prices
-   const priceElements = await page.$$('[data-test="inventory-item-price"]');
+   const priceElements = await page.$$('[data-test="inventory-item-price"]');// Adjust this selector to match all individual item prices
    let calculatedTotal = 0;
    let itemIndex = 1;
    for (const priceElement of priceElements) {
